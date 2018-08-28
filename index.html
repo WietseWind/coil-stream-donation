@@ -90,8 +90,8 @@
                                             return a + b
                                         }, 0)
                                     }
-                                    setTimeout(calc, 500)
-                                    setTimeout(calc, 1000)
+                                    setTimeout(calc, 500) // Async, slighly delayed (ugly).
+                                    setTimeout(calc, 1000) // Just in case, half a second later again.
                                 })
                                 
                                 that.sendPayment(streamId)
