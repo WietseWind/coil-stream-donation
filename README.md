@@ -1,4 +1,4 @@
-# Coil.comdonations
+# Coil.com donations
 
 This sample code allows visitors to stream [Coil.com](https://coil.com) donations to your **ILP Payment pointer** while visiting your page.
 
