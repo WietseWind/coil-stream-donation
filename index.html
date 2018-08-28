@@ -1,0 +1,106 @@
+<html>
+<head>
+    <title>Coil Deposit</title>
+    <link href="https://fonts.googleapis.com/css?family=M+PLUS+Rounded+1c" rel="stylesheet">
+    <script src="https://polyfill.webmonetization.org/polyfill.js" crossOrigin="anonymous"></script>
+    <link href="./assets/style.css" rel="stylesheet">
+    <script src="./assets/vue.js"></script>
+    <!-- Polyfills -->
+    <script src="./assets/buffer.js"></script>
+    <script src="./assets/reduce.js"></script>
+</head>
+<body>
+    <div id="vuecoildonate">
+        <div v-if="!connected && !error && (totalDropsSent + totalSent) === 0">
+            Connecting...
+        </div>
+        <div v-if="!connected && error" v-cloak>
+            Error: {{ errorMessage }}
+        </div>
+        <div v-if="connected && !error" v-cloak>
+            <div v-show="(totalDropsSent + totalSent) === 0">Connected, sending...</div>
+            <div id="donationstate" v-show="(totalDropsSent + totalSent) > 0">
+                Donated {{ totalDropsSent + totalSent }} drops, 
+                <b>{{ (totalDropsSent + totalSent) / 1000000 }} XRP</b> with Coil
+            </div>
+        </div>
+
+    </div> 
+    
+    <hr size="1" color="#ccc" />
+    By: <a href="https://wietse.com" target="_blank">@WietseWind</a>, source: <a href="https://github.com/WietseWind/coil-stream-donation" target="_blank">https://github.com/WietseWind/coil-stream-donation</a>
+    
+    <script>
+        var stream = []
+        var maxXrpDrops = 10 * 1000000
+        new Vue({
+            el : "#vuecoildonate",
+            data : {
+                destination: 'https://twitter.xrptipbot.com/WietseWind/.well-known/pay', // ILP Payment Pointer to URL
+                connected: false,
+                error: false,
+                errorMessage: '',
+                dropsSent: [],
+                totalDropsSent: 0,
+                totalSent: 0
+            },
+            methods: {
+                sendPayment (streamId) {
+                    this.dropsSent[streamId] = 0
+                   
+                    if (this.connected) {
+                        stream[streamId].setSendMax(maxXrpDrops * 1000).then(function (s) {}).catch(function (e) {})
+                    }
+                },
+                init () {
+                    var streamId = this.dropsSent.length
+                    this.dropsSent[streamId] = 0
+                    var that = this
+                    var monetizeTimeout = setTimeout(function () {
+                        that.error = true
+                        that.errorMessage = 'Cannot connect to Coil (WebMonetization)'
+                    }, 12 * 1000)
+
+                    fetch(this.destination, { headers: { Accept: 'application/spsp4+json, application/spsp+json' } })
+                        .then(function (r) { return r.json() })
+                        .then(function (r) {
+                            window.WebMonetization.monetize({
+                                destinationAccount: r.destination_account,
+                                sharedSecret: new buffer.Buffer(r.shared_secret, 'base64').buffer
+                            }).then(function (c) {
+                                clearTimeout(monetizeTimeout)
+                                that.error = false
+                                that.connected = true
+                                stream[streamId] = c.createStream()
+
+                                stream[streamId].addEventListener('close', function (s) {
+                                    that.init()
+                                    setTimeout(function () {
+                                        that.totalSent += that.dropsSent[streamId]
+                                    }, 500)
+                                })
+                                c.addEventListener('close', function (s) {})
+
+                                stream[streamId].addEventListener('outgoing_money', function (s) {
+                                    var calc = function () {
+                                        that.dropsSent[streamId] = parseFloat(c.totalDelivered)
+                                        that.totalDropsSent = that.dropsSent.reduce(function (a, b) {
+                                            return a + b
+                                        }, 0)
+                                    }
+                                    setTimeout(calc, 500)
+                                    setTimeout(calc, 1000)
+                                })
+                                
+                                that.sendPayment(streamId)
+                            }).catch(function (e) {})
+                        }).catch(function (e) {})
+                }
+            },
+            mounted: function () {
+                this.init()
+            }
+        })
+    </script>
+</body>
+</html>
