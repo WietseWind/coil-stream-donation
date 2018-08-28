@@ -61,7 +61,7 @@
                     var monetizeTimeout = setTimeout(function () {
                         that.error = true
                         that.errorMessage = 'Cannot connect to Coil (WebMonetization)'
-                    }, 12 * 1000)
+                    }, 12 * 1000) // Assume timed out after 12 seconds
 
                     fetch(this.destination, { headers: { Accept: 'application/spsp4+json, application/spsp+json' } })
                         .then(function (r) { return r.json() })
@@ -76,7 +76,7 @@
                                 stream[streamId] = c.createStream()
 
                                 stream[streamId].addEventListener('close', function (s) {
-                                    that.init()
+                                    that.init() // Stream closed, restart and continue donating
                                     setTimeout(function () {
                                         that.totalSent += that.dropsSent[streamId]
                                     }, 500)
