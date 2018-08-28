@@ -50,6 +50,8 @@
                    
                     if (this.connected) {
                         stream[streamId].setSendMax(maxXrpDrops * 1000).then(function (s) {}).catch(function (e) {})
+                        // Drops * 1000 because moneyd on the receiving end, configured with XRP, is using 6 decimals
+                        //    while Coil is using 9 decimals.
                     }
                 },
                 init () {
