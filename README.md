@@ -8,6 +8,9 @@ You can edit **[line 39](https://github.com/WietseWind/coil-stream-donation/blob
 
 [https://twitter.com/WietseWind/status/1034328261428486144](https://twitter.com/WietseWind/status/1034328261428486144)
 
+Sample gist based on this code, used at https://xrpcommunity.blog: 
+https://gist.github.com/WietseWind/dbfb5d81ae4e8588daaf2f187d36527c
+
 ---
 
 Combine with [https://github.com/WietseWind/xrptipbot-ilp-receiver](https://github.com/WietseWind/xrptipbot-ilp-receiver) if you want to run your own ILP Payment pointer.  
